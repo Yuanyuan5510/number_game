@@ -1,0 +1,23 @@
+[
+  {
+    "score": 2048,
+    "moves": 150,
+    "grid_size": 4,
+    "date": "2025-09-06",
+    "mode": "single"
+  },
+  {
+    "score": 1024,
+    "moves": 200,
+    "grid_size": 4,
+    "date": "2025-09-06",
+    "mode": "single"
+  },
+  {
+    "score": 512,
+    "moves": 100,
+    "grid_size": 4,
+    "date": "2025-09-06",
+    "mode": "single"
+  }
+]
