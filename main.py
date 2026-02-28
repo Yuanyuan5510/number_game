@@ -12,13 +12,14 @@ import threading
 import webbrowser
 import logging
 from pathlib import Path
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QWidget, 
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QWidget, 
                            QPushButton, QLabel, QHBoxLayout, QMessageBox, 
-                           QStatusBar, QToolBar, QAction, QSplashScreen)
-from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtCore import QUrl, Qt, QTimer, pyqtSignal, QObject
-from PyQt5.QtGui import QIcon, QDesktopServices, QPixmap, QPainter, QColor, QFont, QRadialGradient
-
+                           QStatusBar, QToolBar, QSplashScreen)
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtCore import QUrl, Qt, QTimer, pyqtSignal, QObject
+from PyQt6.QtGui import QIcon, QDesktopServices, QPixmap, QPainter, QColor, QFont, QRadialGradient, QAction
+from PyQt6.QtWebEngineCore import QWebEngineSettings
+"2026.2.19 由于 MAC对PyQt5兼任性太差，决定使用PyQt6：应为"
 # 添加项目根目录到Python路径
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -32,22 +33,7 @@ class ServerManager(QObject):
         self.server_thread = None
         self.app = None
         self.running = False
-        self._import_lock = threading.Lock()
-        self._imported = False
-        
-    def _lazy_import(self):
-        """延迟导入Flask应用，减少启动时间"""
-        if not self._imported:
-            with self._import_lock:
-                if not self._imported:
-                    try:
-                        from server.flask_app import create_app
-                        self._create_app = create_app
-                        self._imported = True
-                    except ImportError as e:
-                        logging.error(f"导入Flask应用失败: {e}")
-                        return False
-        return True
+        self.port = 5000
         
     def check_network_connection(self):
         """检查网络连接状态"""
@@ -70,18 +56,6 @@ class ServerManager(QObject):
         except:
             return False
             
-    def _test_local_network(self):
-        """测试本地网络连接 - 简化版本"""
-        try:
-            # 简单的本地回环测试
-            import socket
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            result = sock.connect_ex(('127.0.0.1', 80))
-            sock.close()
-            return True  # 总是返回True，避免阻塞
-        except:
-            return True
-            
     def start_server(self):
         """启动Flask服务器 - 最终稳定版本"""
         if self.running:
@@ -92,25 +66,31 @@ class ServerManager(QObject):
             import sys
             import os
             sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            print("os.path可以用于 mac")
             
             from server.flask_app import create_app
             app = create_app()
+            print("创建服务器 -导入成功")
             
             # 使用固定端口
             self.port = 5000
+            self.app = app
             
             def run_server():
                 try:
                     # 确保绑定到正确的地址和端口
                     app.run(
-                        host='127.0.0.1',
+                        host='0.0.0.0',  # 允许局域网访问
                         port=5000,
                         debug=False,
                         use_reloader=False,
-                        threaded=True  # 启用线程处理
+                        threaded=True,  # 启用线程处理
+                        processes=1     # 限制进程数
                     )
                 except Exception as e:
-                    print(f"服务器运行错误: {e}")
+                    print(f"服务器运行错误-2: {e}")
+                    self.running = False
+                    self.server_stopped.emit()
                     
             # 启动服务器线程
             self.server_thread = threading.Thread(target=run_server, daemon=True)
@@ -121,24 +101,23 @@ class ServerManager(QObject):
             time.sleep(2)
             
             # 验证服务器是否正常运行
-            if self._test_server_connection(5000):
-                self.running = True
-                self.server_started.emit()
-                return True
-            else:
-                # 如果第一次测试失败，再等待一下
-                time.sleep(1)
+            max_attempts = 3
+            for attempt in range(max_attempts):
                 if self._test_server_connection(5000):
                     self.running = True
                     self.server_started.emit()
                     return True
                 else:
-                    # 强制标记为运行，避免阻塞用户
-                    self.running = True
-                    return True
-                    
+                    # 如果测试失败，再等待一下
+                    time.sleep(1)
+            
+            # 如果所有尝试都失败，标记为运行但发出警告
+            print("警告: 服务器启动验证失败，但仍继续运行")
+            self.running = True
+            return True
+            
         except Exception as e:
-            print(f"启动服务器失败: {e}")
+            print(f"启动服务器失败-1: {e}")
             # 即使失败也允许继续，用户可以尝试刷新
             self.running = True
             return True
@@ -147,53 +126,10 @@ class ServerManager(QObject):
         """测试服务器连接"""
         try:
             import requests
-            response = requests.get(f'http://127.0.0.1:{port}/desktop', timeout=5)
+            response = requests.get(f'http://127.0.0.1:{port}/desktop', timeout=3)
             return response.status_code == 200
-        except:
-            return False
-            
-        try:
-            # 使用延迟绑定避免循环引用
-            self.app = self._create_app()
-            
-            def run_server():
-                try:
-                    # 优化服务器配置，减少资源占用
-                    self.app.run(
-                        host='0.0.0.0', 
-                        port=5000, 
-                        debug=False, 
-                        use_reloader=False,
-                        threaded=True,  # 启用线程池
-                        processes=1     # 限制进程数
-                    )
-                except Exception as e:
-                    logging.error(f"服务器运行错误: {e}")
-                    self.running = False
-                    
-            self.server_thread = threading.Thread(target=run_server, daemon=True)
-            self.server_thread.start()
-            
-            # 验证服务器是否真的启动
-            import time
-            time.sleep(0.5)  # 给服务器启动时间
-            
-            # 检查端口是否被占用
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            result = sock.connect_ex(('127.0.0.1', 5000))
-            sock.close()
-            
-            if result == 0:
-                self.running = True
-                self.server_started.emit()
-                return True
-            else:
-                logging.error("服务器端口未响应")
-                return False
-                
         except Exception as e:
-            logging.error(f"启动服务器失败: {e}")
-            self.running = False
+            print(f"服务器连接测试失败: {e}")
             return False
     
     def stop_server(self):
@@ -202,14 +138,33 @@ class ServerManager(QObject):
             return
             
         try:
-            # 这里我们使用一个技巧来关闭服务器
-            # 由于Flask没有直接的stop方法，我们使用socket连接来触发关闭
-            try:
-                socket.create_connection(('127.0.0.1', 5000), timeout=1)
-            except:
-                pass
+            # 标记服务器为非运行状态
             self.running = False
+            
+            # 尝试通过socket连接触发服务器关闭
+            try:
+                sock = socket.create_connection(('127.0.0.1', 5000), timeout=1)
+                sock.close()
+            except Exception as e:
+                print(f"停止服务器时连接失败: {e}")
+            
+            # 等待服务器线程结束
+            if hasattr(self, 'server_thread') and self.server_thread.is_alive():
+                print("等待服务器线程结束...")
+                # 不使用join()，避免阻塞UI
+                import time
+                for _ in range(5):
+                    if not self.server_thread.is_alive():
+                        break
+                    time.sleep(0.5)
+            
+            # 清除服务器引用
+            if hasattr(self, 'app'):
+                del self.app
+            
+            # 发出服务器停止信号
             self.server_stopped.emit()
+            print("服务器已停止")
         except Exception as e:
             logging.error(f"停止服务器失败: {e}")
 
@@ -234,10 +189,10 @@ class MainWindow(QMainWindow):
         
         # 创建启动画面，使用更小的尺寸减少内存占用
         pixmap = QPixmap(500, 300)
-        pixmap.fill(Qt.transparent)
+        pixmap.fill(Qt.GlobalColor.transparent)
         
         painter = QPainter(pixmap)
-        painter.setRenderHint(QPainter.Antialiasing, False)  # 关闭抗锯齿提升性能
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing, False)  # 关闭抗锯齿提升性能
         
         # 使用简单渐变减少计算开销
         gradient = QRadialGradient(250, 150, 250)
@@ -247,21 +202,21 @@ class MainWindow(QMainWindow):
         
         # 简化标题绘制
         painter.setPen(QColor("white"))
-        font = QFont("Microsoft YaHei", 28, QFont.Bold)
+        font = QFont("Microsoft YaHei", 28, QFont.Weight.Bold)
         painter.setFont(font)
-        painter.drawText(pixmap.rect().adjusted(0, 70, 0, 0), Qt.AlignCenter, "SW数字游戏")
+        painter.drawText(pixmap.rect().adjusted(0, 70, 0, 0), Qt.AlignmentFlag.AlignCenter, "SW数字游戏")
         
         # 绘制版本号
         font = QFont("Microsoft YaHei", 12)
         painter.setFont(font)
         painter.setPen(QColor(255, 255, 255, 180))
-        painter.drawText(pixmap.rect().adjusted(0, 110, 0, 0), Qt.AlignCenter, "版本 3.2.3")
+        painter.drawText(pixmap.rect().adjusted(0, 110, 0, 0), Qt.AlignmentFlag.AlignCenter, "版本 3.2.3")
         
         # 简化加载文本
         painter.setPen(QColor(255, 255, 255, 150))
         font = QFont("Microsoft YaHei", 10)
         painter.setFont(font)
-        painter.drawText(pixmap.rect().adjusted(0, 160, 0, 0), Qt.AlignCenter, "正在加载...")
+        painter.drawText(pixmap.rect().adjusted(0, 160, 0, 0), Qt.AlignmentFlag.AlignCenter, "正在加载...")
         
         painter.end()
         
@@ -301,13 +256,13 @@ class MainWindow(QMainWindow):
         
         # 创建Web视图 - 优化配置
         self.web_view = QWebEngineView()
-        self.web_view.setContextMenuPolicy(Qt.NoContextMenu)
+        self.web_view.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
         
         # 优化WebEngine设置
         settings = self.web_view.settings()
-        settings.setAttribute(settings.LocalStorageEnabled, True)
-        settings.setAttribute(settings.JavascriptEnabled, True)
-        settings.setAttribute(settings.PluginsEnabled, False)  # 禁用插件减少资源
+        settings.setAttribute(QWebEngineSettings.WebAttribute.LocalStorageEnabled, True)
+        settings.setAttribute(QWebEngineSettings.WebAttribute.JavascriptEnabled, True)
+        settings.setAttribute(QWebEngineSettings.WebAttribute.PluginsEnabled, False)  # 禁用插件减少资源
         
         # 预加载本地游戏页面，减少首次加载时间
         game_path = os.path.join(os.path.dirname(__file__), 'templates', 'desktop_local.html')
@@ -488,32 +443,32 @@ class MainWindow(QMainWindow):
 
 def create_app_icon():
     """创建应用图标"""
-    from PyQt5.QtGui import QPixmap, QPainter, QFont, QColor
+    from PyQt6.QtGui import QPixmap, QPainter, QFont, QColor
     icon_size = 64
     pixmap = QPixmap(icon_size, icon_size)
-    pixmap.fill(Qt.transparent)
+    pixmap.fill(Qt.GlobalColor.transparent)
     
     painter = QPainter(pixmap)
-    painter.setRenderHint(QPainter.Antialiasing)
+    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
     
     # 绘制渐变背景
     gradient_rect = pixmap.rect().adjusted(4, 4, -4, -4)
     painter.setBrush(QColor(255, 107, 53))
-    painter.setPen(Qt.NoPen)
+    painter.setPen(Qt.PenStyle.NoPen)
     painter.drawRoundedRect(gradient_rect, 8, 8)
     
     # 绘制白色"SW"
-    painter.setPen(Qt.white)
-    font = QFont("Arial", 18, QFont.Bold)
+    painter.setPen(Qt.GlobalColor.white)
+    font = QFont("Arial", 18, QFont.Weight.Bold)
     painter.setFont(font)
-    painter.drawText(pixmap.rect(), Qt.AlignCenter, "SW")
+    painter.drawText(pixmap.rect(), Qt.AlignmentFlag.AlignCenter, "SW")
     
     painter.end()
     return QIcon(pixmap)
 
 def center_window(window):
     """将窗口居中显示"""
-    from PyQt5.QtGui import QScreen
+    from PyQt6.QtGui import QScreen
     screen = QApplication.primaryScreen()
     screen_geometry = screen.availableGeometry()
     
@@ -552,7 +507,7 @@ def main():
     center_window(window)
     window.show()
     
-    return app.exec_()
+    return app.exec()
 
 if __name__ == '__main__':
     sys.exit(main())

@@ -9,11 +9,20 @@ from flask import Flask, render_template, request, jsonify, session, send_file
 from flask_socketio import SocketIO, emit, join_room, leave_room
 import secrets
 import json
+import concurrent.futures
+import time
+import threading
+import psutil
+print("服务器模块导入成功")
 
 from utils.config import GameConfig
 from utils.device_detector import get_device_info
 from game.game_logic import Game2048
 from server.leaderboard import leaderboard
+print("导入成功")
+
+# 创建线程池
+executor = concurrent.futures.ThreadPoolExecutor(max_workers=10)
 
 def create_app():
     """创建Flask应用"""
@@ -32,8 +41,44 @@ def create_app():
     app.config['SECRET_KEY'] = secrets.token_hex(16)
     app.config['CONFIG'] = config
     
+    # 性能监控数据
+    performance_data = {
+        'request_times': [],
+        'start_time': time.time(),
+        'total_requests': 0,
+        'error_count': 0
+    }
+    
+    # 性能监控中间件
+    @app.before_request
+    def before_request():
+        request.start_time = time.time()
+        performance_data['total_requests'] += 1
+    
+    @app.after_request
+    def after_request(response):
+        if hasattr(request, 'start_time'):
+            request_time = time.time() - request.start_time
+            performance_data['request_times'].append(request_time)
+            # 只保留最近1000个请求的时间
+            if len(performance_data['request_times']) > 1000:
+                performance_data['request_times'] = performance_data['request_times'][-1000:]
+        return response
+    
+    @app.errorhandler(500)
+    def handle_error(e):
+        performance_data['error_count'] += 1
+        return jsonify({'error': str(e)}), 500
+    
     # 初始化SocketIO - 优化配置确保稳定运行
-    socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading', logger=False, engineio_logger=False)
+    socketio = SocketIO(app, 
+                       cors_allowed_origins="*", 
+                       async_mode='threading', 
+                       logger=False, 
+                       engineio_logger=False,
+                       max_http_buffer_size=10 * 1024 * 1024,  # 增加缓冲区大小
+                       ping_timeout=60,  # 增加超时时间
+                       ping_interval=25)  # 调整ping间隔
     
     # 存储游戏状态
     games = {}  # session_id -> Game2048
@@ -106,7 +151,14 @@ def create_app():
             if not session_id or session_id not in games:
                 return jsonify({'error': 'Game not found'}), 404
             
-            response = jsonify(games[session_id].get_state())
+            def get_state():
+                return games[session_id].get_state()
+            
+            # 使用线程池处理状态获取
+            future = executor.submit(get_state)
+            game_state = future.result()
+            
+            response = jsonify(game_state)
             response.headers['Access-Control-Allow-Origin'] = '*'
             response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
             response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
@@ -124,21 +176,28 @@ def create_app():
         data = request.get_json()
         direction = data.get('direction')
         
-        game = games[session_id]
-        moved = False
+        def execute_move():
+            game = games[session_id]
+            moved = False
+            
+            if direction == 'left':
+                moved = game.move_left()
+            elif direction == 'right':
+                moved = game.move_right()
+            elif direction == 'up':
+                moved = game.move_up()
+            elif direction == 'down':
+                moved = game.move_down()
+            
+            return moved, game.get_state()
         
-        if direction == 'left':
-            moved = game.move_left()
-        elif direction == 'right':
-            moved = game.move_right()
-        elif direction == 'up':
-            moved = game.move_up()
-        elif direction == 'down':
-            moved = game.move_down()
+        # 使用线程池处理游戏移动
+        future = executor.submit(execute_move)
+        moved, game_state = future.result()
         
         response = jsonify({
             'moved': moved,
-            'state': game.get_state()
+            'state': game_state
         })
         response.headers['Access-Control-Allow-Origin'] = '*'
         response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
@@ -148,6 +207,7 @@ def create_app():
     @app.route('/api/game/new', methods=['POST'])
     def new_game():
         """开始新游戏"""
+        # 在主线程中获取session和请求数据
         session_id = session.get('session_id')
         if not session_id:
             session_id = secrets.token_hex(8)
@@ -161,9 +221,16 @@ def create_app():
         if (device_info['is_mobile'] or device_info['is_tablet']) and size > 8:
             size = 8
         
-        games[session_id] = Game2048(size)
+        def create_game():
+            game = Game2048(size)
+            games[session_id] = game
+            return game.get_state()
         
-        response = jsonify(games[session_id].get_state())
+        # 使用线程池处理游戏创建
+        future = executor.submit(create_game)
+        game_state = future.result()
+        
+        response = jsonify(game_state)
         response.headers['Access-Control-Allow-Origin'] = '*'
         response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
@@ -218,6 +285,39 @@ def create_app():
     def get_leaderboard_stats():
         """获取排行榜统计信息"""
         response = jsonify(leaderboard.get_stats())
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response
+    
+    @app.route('/api/performance')
+    def get_performance_stats():
+        """获取服务器性能统计信息"""
+        # 计算平均响应时间
+        avg_response_time = 0
+        if performance_data['request_times']:
+            avg_response_time = sum(performance_data['request_times']) / len(performance_data['request_times'])
+        
+        # 获取系统资源使用情况
+        process = psutil.Process()
+        memory_info = process.memory_info()
+        cpu_percent = process.cpu_percent(interval=0.1)
+        
+        # 计算服务器运行时间
+        uptime = time.time() - performance_data['start_time']
+        
+        stats = {
+            'uptime': uptime,
+            'total_requests': performance_data['total_requests'],
+            'error_count': performance_data['error_count'],
+            'avg_response_time': avg_response_time,
+            'memory_usage': memory_info.rss / (1024 * 1024),  # 转换为MB
+            'cpu_usage': cpu_percent,
+            'active_games': len(games),
+            'active_rooms': len(rooms)
+        }
+        
+        response = jsonify(stats)
         response.headers['Access-Control-Allow-Origin'] = '*'
         response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'

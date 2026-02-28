@@ -1,5 +1,14 @@
 [
   {
+    "score": 476,
+    "max_tile": 256,
+    "moves": 215,
+    "size": 4,
+    "player_name": "玩家_ba8c5df6",
+    "timestamp": "2026-02-28T14:52:48.701849",
+    "date": "2026-02-28 14:52"
+  },
+  {
     "score": 64,
     "max_tile": 32,
     "moves": 27,
@@ -52,5 +61,14 @@
     "player_name": "玩家_2249899d",
     "timestamp": "2025-09-13T01:04:39.599570",
     "date": "2025-09-13 01:04"
+  },
+  {
+    "score": 8,
+    "max_tile": 4,
+    "moves": 2,
+    "size": 4,
+    "player_name": "玩家_6afe170c",
+    "timestamp": "2026-02-28T14:43:49.044690",
+    "date": "2026-02-28 14:43"
   }
 ]
