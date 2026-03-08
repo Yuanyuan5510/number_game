@@ -19,7 +19,7 @@ from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtCore import QUrl, Qt, QTimer, pyqtSignal, QObject
 from PyQt6.QtGui import QIcon, QDesktopServices, QPixmap, QPainter, QColor, QFont, QRadialGradient, QAction
 from PyQt6.QtWebEngineCore import QWebEngineSettings
-"2026.2.19 由于 MAC对PyQt5兼任性太差，决定使用PyQt6：应为"
+"2026.2.19 由于 MAC对PyQt5兼任性太差，决定使用PyQt6"
 # 添加项目根目录到Python路径
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
