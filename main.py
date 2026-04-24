@@ -107,7 +107,8 @@ def clean_log_files():
     """
     from datetime import datetime, timedelta
     
-    log_dir = get_resource_path('logs')
+    # 使用全局LOG_DIR变量
+    log_dir = LOG_DIR
     
     try:
         if not os.path.exists(log_dir):
@@ -144,8 +145,15 @@ def clean_log_files():
 
 VERSION = "3.2.6"
 
-LOG_DIR = Path(get_resource_path('logs'))
-LOG_DIR.mkdir(exist_ok=True)
+# 日志文件保存在用户可访问的位置
+if os.name == 'nt':
+    # Windows系统
+    LOG_DIR = Path(os.path.expanduser('~')) / 'AppData' / 'Local' / 'SW数字游戏' / 'logs'
+else:
+    # 其他系统
+    LOG_DIR = Path(os.path.expanduser('~')) / '.sw_number_game' / 'logs'
+
+LOG_DIR.mkdir(parents=True, exist_ok=True)
 LOG_FILE = LOG_DIR / f'app_{datetime.now().strftime("%Y%m%d")}.log'
 
 # 配置日志
@@ -288,8 +296,8 @@ class VersionChecker:
 
     def __init__(self, current_version):
         self.current_version = current_version
-        self.international_url = "https://github.com/Yuanyuan5510/number_game/blob/main/version.txt"
-        self.china_url = "https://gitee.com/yuanyuan5510/1110/blob/main/version.txt"
+        self.international_url = "https://raw.githubusercontent.com/Yuanyuan5510/number_game/main/version.txt"
+        self.china_url = "https://gitee.com/yuanyuan5510/1110/raw/main/version.txt"
         self.region_check_url = "https://api-website-2.yuanyuan5510-692.workers.dev/.netlify/functions/ip"
 
     def check_version_async(self):
@@ -358,11 +366,18 @@ class VersionChecker:
         remote_parts = parse_version(remote)
         current_parts = parse_version(current)
 
+        # 比较相同长度的部分
         for r, c in zip(remote_parts, current_parts):
             if r > c:
                 return 1
             elif r < c:
                 return -1
+        
+        # 如果前面的部分都相同，那么长度较长的版本号更大
+        if len(remote_parts) > len(current_parts):
+            return 1
+        elif len(remote_parts) < len(current_parts):
+            return -1
         return 0
 
     def _show_update_prompt(self, new_version):
@@ -508,7 +523,7 @@ class MainWindow(BaseWindow):
             logger.warning("Requests未安装，网络功能可能受限")
 
         logger.info("检查静态资源")
-        static_dir = os.path.join(base_dir, 'static')
+        static_dir = get_resource_path('static')
         if os.path.exists(static_dir):
             logger.info("静态资源目录: 存在")
             css_dir = os.path.join(static_dir, 'css')
