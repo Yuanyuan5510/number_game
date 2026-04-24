@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SW数字游戏 - 欢迎页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .welcome-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+            animation: slideIn 0.6s ease-out;
+            position: relative;
+        }
+        
+        .welcome-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4CAF50, #45a049, #4CAF50);
+            border-radius: 20px 20px 0 0;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .game-icon {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 15px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: bold;
+            color: #4CAF50;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .game-icon:hover {
+            transform: scale(1.05) rotate(5deg);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #333;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            border-left: 4px solid #4CAF50;
+            padding-left: 15px;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 4px solid #4CAF50;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 0;
+            background: linear-gradient(to bottom, #4CAF50, #45a049);
+            transition: height 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.2);
+        }
+
+        .feature-card:hover::before {
+            height: 100%;
+        }
+
+        .feature-card h3 {
+            color: #4CAF50;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .controls {
+            background: #f0f8ff;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .control-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .key {
+            background: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-right: 15px;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .start-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+            z-index: -1;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #4CAF50;
+            border: 2px solid #4CAF50;
+        }
+
+        .btn-secondary:hover {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .tips {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .tips h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .tips ul {
+            color: #856404;
+            padding-left: 20px;
+        }
+
+        .tips li {
+            margin: 5px 0;
+        }
+
+        @media (max-width: 600px) {
+            .welcome-container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 25px;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+            
+            .start-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-container">
+        <div class="header">
+            <div class="game-icon">SW</div>
+            <h1>SW数字游戏</h1>
+            <p>经典益智游戏，挑战你的智慧极限</p>
+        </div>
+        
+        <div class="content">
+            <div class="section">
+                <h2>🎮 游戏特色</h2>
+                <div class="features">
+                    <div class="feature-card">
+                        <h3>🎯 经典玩法</h3>
+                        <p>经典的2048合并玩法，简单易上手，难于精通</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>💻 多平台支持</h3>
+                        <p>支持电脑本地游戏和局域网对战模式</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📱 响应式设计</h3>
+                        <p>完美适配电脑、平板、手机等各种设备</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🎨 精美界面</h3>
+                        <p>优雅的UI设计，流畅的动画效果</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎯 游戏规则</h2>
+                <ol style="color: #666; line-height: 1.8; margin-left: 20px;">
+                    <li>使用方向键或滑动操作移动所有方块</li>
+                    <li>当两个相同数字的方块碰撞时，它们会合并成一个方块</li>
+                    <li>每次移动后，会在空白处随机出现一个2或4</li>
+                    <li><strong>胜利条件：</strong>合成2048方块即可获胜！可继续挑战更高倍数</li>
+                    <li><strong>失败标准：</strong>当棋盘所有方格被占满且无法移动时游戏结束</li>
+                    <li><strong>分数计算：</strong>当前棋盘上所有方格中的数字总和</li>
+                    <li><strong>游戏保存：</strong>每达到2048的倍数（2048、4096、8192...）自动保存游戏进度</li>
+                    <li><strong>继续游戏：</strong>下次启动时可选择继续上次的游戏进度</li>
+                </ol>
+            </div>
+
+            <div class="section">
+                <h2>🎮 操作方式</h2>
+                <div class="controls">
+                    <h4 style="margin-bottom: 15px; color: #333;">电脑端操作：</h4>
+                    <div class="control-item">
+                        <span class="key">↑ ↓ ← →</span>
+                        <span>方向键控制移动</span>
+                    </div>
+                    <div class="control-item">
+                        <span class="key">空格键</span>
+                        <span>重新开始游戏</span>
+                    </div>
+                    <div class="control-item">
+                        <span class="key">ESC键</span>
+                        <span>退出游戏</span>
+                    </div>
+                    
+                    <h4 style="margin: 15px 0; color: #333;">手机端操作（局域网模式）：</h4>
+                    <div class="control-item">
+                        <span class="key">滑动</span>
+                        <span>上下左右滑动控制</span>
+                    </div>
+                    <div class="control-item">
+                        <span class="key">点击</span>
+                        <span>使用虚拟方向键</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🚀 启动方式</h2>
+                <div class="tips">
+                    <h4>💡 快速启动提示：</h4>
+                    <ul>
+                        <li><strong>本地游戏</strong>：直接双击运行，无需网络</li>
+                        <li><strong>局域网对战</strong>：需要先安装Flask依赖</li>
+                        <li><strong>首次运行</strong>：会自动创建配置文件</li>
+                    <li><strong>窗口位置</strong>：会自动居中显示</li>
+                    <li><strong>网络优化</strong>：支持国内DNS服务器，连接更稳定</li>
+                    <li><strong>版本更新</strong>：每次更新都会记录详细更新日志</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="start-buttons">
+                <a href="#" class="btn btn-primary" onclick="goBackToGame()">返回游戏</a>
+                <a href="#" class="btn btn-secondary" onclick="showHelp()">查看帮助</a>
+                <a href="#" class="btn btn-secondary" onclick="openUpdates()">查看更新</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script>
+        let communicator;
+        
+        // 初始化WebChannel通信（仅在QWebEngineView中有效）
+        function initWebChannel() {
+            if (typeof qt !== 'undefined' && qt.webChannelTransport) {
+                new QWebChannel(qt.webChannelTransport, function(channel) {
+                    communicator = channel.objects.communicator;
+                    console.log('WebChannel initialized');
+                });
+            }
+        }
+        
+        // 页面加载完成后初始化WebChannel
+        window.onload = function() {
+            initWebChannel();
+        };
+
+        function startLocalGame() {
+            const modal = createModal('启动本地游戏', '点击开始按钮启动SW数字游戏！\n\n游戏将自动启动并显示主界面');
+            document.body.appendChild(modal);
+        }
+
+        function showHelp() {
+            const modal = createModal('游戏帮助', `
+                <h5>游戏规则</h5>
+                <p>使用方向键或滑动来移动方块。当两个相同数字的方块碰撞时，它们会合并成一个新的方块，数字相加。</p>
+                <p><strong>胜利条件：</strong>合成2048方块即可获胜！</p>
+                <p><strong>失败条件：</strong>当棋盘被填满且无法移动时游戏结束。</p>
+                <p><strong>分数计算：</strong>当前棋盘上所有方块的数字总和。</p>
+                <h5>特殊方块M</h5>
+                <p>神秘的M方块，两个M结合可以消除周围3x3区域内的所有方块，并获得这些方块的分数！</p>
+                <h5>操作说明</h5>
+                <ul>
+                    <li><strong>键盘：</strong>方向键或WASD键</li>
+                    <li><strong>鼠标：</strong>点击并拖动</li>
+                    <li><strong>触屏：</strong>滑动操作</li>
+                </ul>
+            `);
+            document.body.appendChild(modal);
+        }
+
+        function goBackToGame() {
+            // 调用Python端的方法关闭窗口
+            if (communicator) {
+                communicator.goBackToGame();
+            } else {
+                // 备用方案：直接关闭窗口
+                window.close();
+            }
+        }
+
+        function openUpdates() {
+            // 调用Python端的方法打开更新窗口并关闭当前窗口
+            if (communicator) {
+                communicator.open_updates();
+            } else {
+                // 备用方案：直接打开窗口
+                window.open('updates.html', '_blank', 'width=800,height=600,resizable=yes,scrollbars=yes');
+                window.close();
+            }
+        }
+
+        function createModal(title, content) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+                animation: fadeIn 0.3s ease;
+            `;
+
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: white;
+                padding: 30px;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                max-width: 500px;
+                width: 90%;
+                animation: slideIn 0.3s ease;
+            `;
+
+            const modalTitle = document.createElement('h3');
+            modalTitle.textContent = title;
+            modalTitle.style.cssText = `
+                margin: 0 0 15px 0;
+                color: #4CAF50;
+                font-size: 1.5em;
+                border-bottom: 2px solid #4CAF50;
+                padding-bottom: 10px;
+            `;
+
+            const modalText = document.createElement('pre');
+            modalText.textContent = content;
+            modalText.style.cssText = `
+                margin: 15px 0;
+                color: #333;
+                font-family: 'Microsoft YaHei', Arial, sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+                white-space: pre-line;
+            `;
+
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = '关闭';
+            closeBtn.style.cssText = `
+                background: #4CAF50;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 16px;
+                float: right;
+            `;
+            closeBtn.onmouseover = () => closeBtn.style.background = '#45a049';
+            closeBtn.onmouseout = () => closeBtn.style.background = '#4CAF50';
+            closeBtn.onclick = () => document.body.removeChild(modal);
+
+            modalContent.appendChild(modalTitle);
+            modalContent.appendChild(modalText);
+            modalContent.appendChild(closeBtn);
+            modal.appendChild(modalContent);
+
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                }
+            };
+
+            return modal;
+        }
+
+        // 页面加载动画
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.feature-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.animation = `slideIn 0.6s ease-out ${index * 0.1}s both`;
+                }, 100);
+            });
+        });
+
+        // 添加CSS动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            @keyframes slideIn {
+                from { opacity: 0; transform: translateY(-20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

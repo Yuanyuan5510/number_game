@@ -1,0 +1,522 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Flask应用工厂
+创建和配置Flask应用
+"""
+
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from flask import Flask, render_template, request, jsonify, session, send_file
+from flask_socketio import SocketIO, emit, join_room, leave_room
+import secrets
+import json
+import concurrent.futures
+import time
+import threading
+import psutil
+print("服务器模块导入成功")
+
+from utils.config import GameConfig
+from utils.device_detector import get_device_info
+from game.game_logic import Game2048
+from server.leaderboard import leaderboard
+print("导入成功")
+
+# 创建线程池
+executor = concurrent.futures.ThreadPoolExecutor(max_workers=10)
+
+def create_app():
+    """创建Flask应用"""
+    from utils.config import GameConfig
+    config = GameConfig()
+    
+    # 获取当前目录的绝对路径
+    import os
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    
+    app = Flask(__name__, 
+                template_folder=os.path.join(base_dir, 'templates'),
+                static_folder=os.path.join(base_dir, 'static'))
+    
+    # 配置
+    app.config['SECRET_KEY'] = secrets.token_hex(16)
+    app.config['CONFIG'] = config
+    
+    # 性能监控数据
+    performance_data = {
+        'request_times': [],
+        'start_time': time.time(),
+        'total_requests': 0,
+        'error_count': 0
+    }
+    
+    # 性能监控中间件
+    @app.before_request
+    def before_request():
+        request.start_time = time.time()
+        performance_data['total_requests'] += 1
+    
+    @app.after_request
+    def after_request(response):
+        if hasattr(request, 'start_time'):
+            request_time = time.time() - request.start_time
+            performance_data['request_times'].append(request_time)
+            # 只保留最近1000个请求的时间
+            if len(performance_data['request_times']) > 1000:
+                performance_data['request_times'] = performance_data['request_times'][-1000:]
+        return response
+    
+    @app.errorhandler(500)
+    def handle_error(e):
+        performance_data['error_count'] += 1
+        return jsonify({'error': str(e)}), 500
+    
+    # 初始化SocketIO - 优化配置确保稳定运行
+    socketio = SocketIO(app, 
+                       cors_allowed_origins="*", 
+                       async_mode='threading', 
+                       logger=False, 
+                       engineio_logger=False,
+                       max_http_buffer_size=10 * 1024 * 1024,  # 增加缓冲区大小
+                       ping_timeout=60,  # 增加超时时间
+                       ping_interval=25)  # 调整ping间隔
+    
+    # 存储游戏状态
+    games = {}  # session_id -> Game2048
+    rooms = {}  # room_id -> {players: set(), game: Game2048}
+    
+    @app.route('/')
+    def index():
+        """主页路由"""
+        device_info = get_device_info()
+        
+        # 检查是否为软件端请求
+        if request.args.get('software') == 'true':
+            template = 'software_embedded.html'
+        elif device_info['is_mobile'] or device_info['is_tablet']:
+            template = 'mobile.html'
+        else:
+            template = 'desktop.html'
+        
+        # 创建新的游戏实例
+        session_id = session.get('session_id')
+        if not session_id:
+            session_id = secrets.token_hex(8)
+            session['session_id'] = session_id
+        
+        if session_id not in games:
+            games[session_id] = Game2048(4)
+        
+        return render_template(
+            template,
+            device_info=device_info,
+            config=config.config
+        )
+
+    @app.route('/desktop')
+    def desktop():
+        return render_template('desktop.html', config=config.config)
+
+    @app.route('/software')
+    def software():
+        return render_template('software_embedded.html', config=config.config)
+    
+    @app.route('/local')
+    def local_access():
+        """本地访问专用路由 - 确保打包后可直接访问"""
+        return render_template('desktop.html', config=config.config)
+    # 获取排行榜数据函数
+    def get_leaderboard_data():
+        """获取排行榜数据"""
+        try:
+            return leaderboard.get_top_scores()
+        except Exception as e:
+            return []
+
+    @app.route('/api/leaderboard')
+    def get_leaderboard():
+        """获取排行榜"""
+        try:
+            data = get_leaderboard_data()
+            response = jsonify(data)
+            response.headers['Content-Type'] = 'application/json; charset=utf-8'
+            return response
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    @app.route('/api/game/state')
+    def get_game_state():
+        """获取游戏状态"""
+        try:
+            session_id = session.get('session_id')
+            if not session_id:
+                session_id = secrets.token_hex(8)
+                session['session_id'] = session_id
+
+            if session_id not in games:
+                games[session_id] = Game2048(4)
+            
+            def get_state():
+                return games[session_id].get_state()
+            
+            # 使用线程池处理状态获取
+            future = executor.submit(get_state)
+            game_state = future.result()
+            
+            response = jsonify(game_state)
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            return response
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    
+    @app.route('/api/game/move', methods=['POST'])
+    def make_move():
+        """执行移动"""
+        session_id = session.get('session_id')
+        if not session_id or session_id not in games:
+            return jsonify({'error': 'Game not found'}), 404
+        
+        data = request.get_json()
+        direction = data.get('direction')
+        
+        def execute_move():
+            game = games[session_id]
+            moved = False
+            
+            if direction == 'left':
+                moved = game.move_left()
+            elif direction == 'right':
+                moved = game.move_right()
+            elif direction == 'up':
+                moved = game.move_up()
+            elif direction == 'down':
+                moved = game.move_down()
+            
+            return moved, game.get_state()
+        
+        # 使用线程池处理游戏移动
+        future = executor.submit(execute_move)
+        moved, game_state = future.result()
+        
+        response = jsonify({
+            'moved': moved,
+            'state': game_state
+        })
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response
+    
+    @app.route('/api/game/new', methods=['POST'])
+    def new_game():
+        """开始新游戏"""
+        # 在主线程中获取session和请求数据
+        session_id = session.get('session_id')
+        if not session_id:
+            session_id = secrets.token_hex(8)
+            session['session_id'] = session_id
+        
+        data = request.get_json()
+        size = data.get('size', 4)
+        
+        # 移动端限制最大8x8
+        device_info = get_device_info()
+        if (device_info['is_mobile'] or device_info['is_tablet']) and size > 8:
+            size = 8
+        
+        def create_game():
+            game = Game2048(size)
+            games[session_id] = game
+            return game.get_state()
+        
+        # 使用线程池处理游戏创建
+        future = executor.submit(create_game)
+        game_state = future.result()
+        
+        response = jsonify(game_state)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response
+    
+    @app.route('/api/game/scores')
+    def get_scores():
+        """获取公开排行榜"""
+        try:
+            scores = leaderboard.get_top_scores()
+            response = jsonify(scores)
+            response.headers['Content-Type'] = 'application/json; charset=utf-8'
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            return response
+        except Exception as e:
+            app.logger.error(f"获取排行榜失败: {e}")
+            return jsonify({'error': str(e), 'scores': []}), 500
+
+    @app.route('/api/game/scores', methods=['POST'])
+    def add_score():
+        """添加分数到排行榜（为每个玩家分配唯一ID并连续记录）"""
+        try:
+            data = request.get_json()
+            score = data.get('score', 0)
+            max_tile = data.get('max_tile', 0)
+            moves = data.get('moves', 0)
+            size = data.get('size', 4)
+            
+            # 获取或创建玩家ID
+            player_id = session.get('player_id')
+            if not player_id:
+                player_id = str(secrets.token_hex(8))
+                session['player_id'] = player_id
+            
+            # 使用玩家ID作为用户名，确保连续记录
+            player_name = f"玩家_{player_id[:8]}"
+            
+            # 更新或添加分数（同一个玩家只保留最高分）
+            leaderboard.add_or_update_score(player_name, score, max_tile, moves, size)
+            
+            response = jsonify({'success': True, 'player_id': player_id})
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            return response
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    
+    @app.route('/api/game/leaderboard/stats')
+    def get_leaderboard_stats():
+        """获取排行榜统计信息"""
+        response = jsonify(leaderboard.get_stats())
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response
+    
+    @app.route('/api/performance')
+    def get_performance_stats():
+        """获取服务器性能统计信息"""
+        # 计算平均响应时间
+        avg_response_time = 0
+        if performance_data['request_times']:
+            avg_response_time = sum(performance_data['request_times']) / len(performance_data['request_times'])
+        
+        # 获取系统资源使用情况
+        process = psutil.Process()
+        memory_info = process.memory_info()
+        cpu_percent = process.cpu_percent(interval=0.1)
+        
+        # 计算服务器运行时间
+        uptime = time.time() - performance_data['start_time']
+        
+        stats = {
+            'uptime': uptime,
+            'total_requests': performance_data['total_requests'],
+            'error_count': performance_data['error_count'],
+            'avg_response_time': avg_response_time,
+            'memory_usage': memory_info.rss / (1024 * 1024),  # 转换为MB
+            'cpu_usage': cpu_percent,
+            'active_games': len(games),
+            'active_rooms': len(rooms)
+        }
+        
+        response = jsonify(stats)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response
+    
+    @socketio.on('connect')
+    def handle_connect():
+        """处理连接"""
+        print(f'Client connected: {request.sid}')
+    
+    @socketio.on('disconnect')
+    def handle_disconnect():
+        """处理断开连接"""
+        print(f'Client disconnected: {request.sid}')
+        
+        # 清理游戏状态
+        session_id = session.get('session_id')
+        if session_id and session_id in games:
+            del games[session_id]
+    
+    @socketio.on('join_room')
+    def handle_join_room(data):
+        """加入房间"""
+        room_id = data.get('room_id', 'default')
+        
+        if room_id not in rooms:
+            rooms[room_id] = {
+                'players': set(),
+                'game': Game2048(4)
+            }
+        
+        rooms[room_id]['players'].add(request.sid)
+        join_room(room_id)
+        
+        emit('room_joined', {
+            'room_id': room_id,
+            'players_count': len(rooms[room_id]['players'])
+        })
+    
+    @socketio.on('game_action')
+    def handle_game_action(data):
+        """处理游戏动作"""
+        room_id = data.get('room_id', 'default')
+        action = data.get('action')
+        
+        if room_id not in rooms:
+            return
+        
+        game = rooms[room_id]['game']
+        moved = False
+        
+        if action == 'move_left':
+            moved = game.move_left()
+        elif action == 'move_right':
+            moved = game.move_right()
+        elif action == 'move_up':
+            moved = game.move_up()
+        elif action == 'move_down':
+            moved = game.move_down()
+        elif action == 'new_game':
+            size = data.get('size', 4)
+            game = Game2048(size)
+            rooms[room_id]['game'] = game
+            moved = True
+        
+        if moved:
+            # 广播游戏状态给房间内的所有玩家
+            emit('game_state', game.get_state(), room=room_id)
+    
+    @app.route('/updates')
+    def updates():
+        return send_file('../updates.html')
+
+    @app.route('/welcome')
+    def welcome():
+        return send_file('../welcome.html')
+
+    @app.route('/updates.html')
+    def updates_html():
+        return send_file('../updates.html')
+
+    @app.route('/welcome.html')
+    def welcome_html():
+        return send_file('../welcome.html')
+
+    @app.route('/favicon.ico')
+    def favicon():
+        return '', 204
+
+    @app.route('/api/users')
+    def get_users():
+        """获取局域网内的所有用户列表"""
+        try:
+            # 从排行榜中获取用户数据
+            leaderboard_users = leaderboard.get_top_scores()
+            
+            # 转换排行榜数据格式，添加id字段
+            users = []
+            for entry in leaderboard_users:
+                # 使用player_name作为id
+                user_id = entry.get('player_name', f"player_{entry.get('timestamp', '')}")
+                users.append({
+                    'id': user_id,
+                    'name': entry.get('player_name', '匿名玩家'),
+                    'score': entry.get('score', 0)
+                })
+            
+            # 从games中获取在线用户
+            online_users = []
+            for session_id, game in games.items():
+                # 尝试获取会话中的用户信息
+                if 'player_id' in session:
+                    player_id = session['player_id']
+                    player_name = f"玩家_{player_id[:8]}"
+                    online_users.append({
+                        'id': player_id,
+                        'name': player_name,
+                        'score': game.score if hasattr(game, 'score') else 0
+                    })
+            
+            # 合并并去重
+            all_users = users + online_users
+            unique_users = []
+            seen_ids = set()
+            for user in all_users:
+                user_id = user.get('id', '')
+                if user_id not in seen_ids:
+                    seen_ids.add(user_id)
+                    unique_users.append(user)
+            
+            response = jsonify(unique_users)
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            return response
+        except Exception as e:
+            app.logger.error(f"获取用户列表失败: {e}")
+            return jsonify({'error': str(e), 'users': []}), 500
+
+    @app.route('/api/users/<user_id>', methods=['DELETE'])
+    def delete_user(user_id):
+        """删除用户"""
+        try:
+            # 从排行榜中删除用户
+            leaderboard.delete_score(user_id)
+            
+            # 从games中删除用户的游戏状态
+            for session_id, game in list(games.items()):
+                if session_id == user_id:
+                    del games[session_id]
+            
+            response = jsonify({'success': True, 'message': f'用户 {user_id} 已删除'})
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            return response
+        except Exception as e:
+            app.logger.error(f"删除用户失败: {e}")
+            return jsonify({'error': str(e), 'success': False}), 500
+
+    # 加密状态存储
+    encryption_enabled = False
+
+    @app.route('/api/encryption/status')
+    def get_encryption_status():
+        """获取加密状态"""
+        try:
+            response = jsonify({'enabled': encryption_enabled})
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            return response
+        except Exception as e:
+            app.logger.error(f"获取加密状态失败: {e}")
+            return jsonify({'error': str(e), 'enabled': False}), 500
+
+    @app.route('/api/encryption/status', methods=['POST'])
+    def set_encryption_status():
+        """设置加密状态"""
+        try:
+            global encryption_enabled
+            data = request.get_json()
+            encryption_enabled = data.get('enabled', False)
+            app.logger.info(f"加密状态已设置为: {encryption_enabled}")
+            response = jsonify({'success': True, 'enabled': encryption_enabled})
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            return response
+        except Exception as e:
+            app.logger.error(f"设置加密状态失败: {e}")
+            return jsonify({'error': str(e), 'success': False}), 500
+
+    return app

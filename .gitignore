@@ -1,0 +1,37 @@
+# 虚拟环境目录
+venv/
+
+# 备份文件
+备份.zip
+
+# 构建输出目录
+dist/
+
+# 日志目录
+logs/
+
+# 缓存文件
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 编辑器配置文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 系统文件
+Thumbs.db
+.DS_Store
+
+# 打包文件
+*.zip
+*.tar.gz
+*.tar.bz2
+
+# 其他临时文件
+*.tmp
+*.temp
