@@ -11,6 +11,7 @@ dist/
 logs/
 Output/
 
+nuitka-crash-report.xml
 Number_game.iss
 wang.station.pfx
 # 缓存文件
