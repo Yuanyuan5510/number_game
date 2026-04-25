@@ -52,18 +52,19 @@ SWnumbergame是一款基于Python和PyQt6开发的数字游戏应用，具有现
 
 2. **执行打包命令**：
    ```bash
-   venv\Scripts\python -m nuitka \
-   --standalone \
-   --enable-plugin=pyqt6 \
-   --windows-icon-from-ico=app_icon.ico \
-   --include-data-dir=templates=templates \
-   --include-data-dir=static=static \
-   --include-data-file=updates.html=updates.html \
-   --include-data-file=welcome.html=welcome.html \
-   --include-data-file=game_config.json=game_config.json \
-   --include-data-file=leaderboard.json=leaderboard.json \
-   --output-dir=dist \
-   main.py
+    venv\Scripts\python -m nuitka \
+    --standalone \
+    --enable-plugin=pyqt6 \
+    --windows-disable-console \
+    --windows-icon-from-ico=app_icon.ico \
+    --include-data-dir=templates=templates \
+    --include-data-dir=static=static \
+    --include-data-file=updates.html=updates.html \
+    --include-data-file=welcome.html=welcome.html \
+    --include-data-file=game_config.json=game_config.json \
+    --include-data-file=leaderboard.json=leaderboard.json \
+    --output-dir=dist \
+    main.py
    ```
 
 3. **打包参数说明**：
@@ -72,6 +73,7 @@ SWnumbergame是一款基于Python和PyQt6开发的数字游戏应用，具有现
    | `--standalone` | 创建独立可执行文件，不依赖系统Python环境 |
    | `--enable-plugin=pyqt6` | 启用PyQt6插件，确保PyQt6相关功能正常工作 |
    | `--windows-icon-from-ico=app_icon.ico` | 设置Windows应用程序图标 |
+   | `--windows-disable-console` | 禁用控制台输出 |
    | `--include-data-dir=templates=templates` | 包含templates目录及其所有内容 |
    | `--include-data-dir=static=static` | 包含static目录及其所有内容 |
    | `--include-data-file=updates.html=updates.html` | 包含updates.html文件 |
