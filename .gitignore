@@ -9,7 +9,10 @@ dist/
 
 # 日志目录
 logs/
+Output/
 
+Number_game.iss
+wang.station.pfx
 # 缓存文件
 __pycache__/
 *.pyc
