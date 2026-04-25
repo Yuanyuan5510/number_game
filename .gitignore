@@ -10,6 +10,7 @@ dist/
 # 日志目录
 logs/
 Output/
+website/
 
 nuitka-crash-report.xml
 Number_game.iss
