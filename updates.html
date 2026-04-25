@@ -6,75 +6,146 @@
     <title>SW数字游戏 - 更新日志</title>
 
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            font-family: 'Microsoft YaHei', sans-serif;
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+            line-height: 1.6;
+            color: #333;
         }
         .update-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
             margin: 30px auto;
-            max-width: 800px;
+            max-width: 900px;
             padding: 40px;
         }
         .update-header {
             text-align: center;
             margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        .update-header h1 {
+            font-size: 2rem;
             color: #333;
+            margin-bottom: 10px;
+        }
+        .update-header p {
+            color: #666;
+            font-size: 1rem;
         }
         .update-version {
             background: linear-gradient(135deg, #FF6B35, #FF8E53);
             color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            padding: 20px 25px;
+            border-radius: 12px;
+            margin: 30px 0 20px 0;
             box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+        .update-version h3 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+        }
+        .update-version .date {
+            font-size: 0.9rem;
+            opacity: 0.9;
         }
         .update-item {
             border-left: 4px solid #FF6B35;
             padding-left: 20px;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
             border-bottom: 1px solid #eee;
         }
         .update-category {
             color: #FF6B35;
             font-weight: bold;
-            font-size: 1.2em;
-            margin-bottom: 10px;
+            font-size: 1.15em;
+            margin-bottom: 12px;
         }
         .update-detail {
             color: #555;
-            line-height: 1.6;
+            line-height: 1.8;
         }
         .feature-list {
             list-style: none;
             padding-left: 0;
         }
         .feature-list li {
-            padding: 8px 0;
+            padding: 10px 0;
             border-bottom: 1px dashed #eee;
+            color: #444;
+        }
+        .feature-list li:last-child {
+            border-bottom: none;
         }
         .feature-list li:before {
             content: "✓";
             color: #28a745;
             font-weight: bold;
-            margin-right: 10px;
+            margin-right: 12px;
         }
         .back-btn {
+            display: inline-block;
             background: linear-gradient(135deg, #667eea, #764ba2);
             border: none;
             padding: 12px 30px;
             border-radius: 25px;
             color: white;
             font-weight: bold;
+            text-decoration: none;
             transition: all 0.3s ease;
+            cursor: pointer;
         }
         .back-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        @media (max-width: 768px) {
+            .update-container {
+                margin: 15px;
+                padding: 25px;
+            }
+            .update-header h1 {
+                font-size: 1.6rem;
+            }
+            .update-version {
+                padding: 15px 20px;
+            }
+            .update-version h3 {
+                font-size: 1.1rem;
+            }
+            .update-item {
+                padding-left: 15px;
+            }
+            .feature-list li {
+                padding: 8px 0;
+                font-size: 0.95rem;
+            }
+        }
+        @media (max-width: 480px) {
+            .update-container {
+                margin: 10px;
+                padding: 15px;
+                border-radius: 15px;
+            }
+            .update-header {
+                margin-bottom: 25px;
+            }
+            .update-header h1 {
+                font-size: 1.4rem;
+            }
+            .update-item {
+                margin-bottom: 20px;
+                padding-bottom: 15px;
+            }
         }
     </style>
 </head>
@@ -168,7 +239,7 @@
 
     <div class="update-version">
         <h3>🚀 版本 3.2.4 - 网络环境检查与安全防护</h3>
-        <p class="mb-0">发布日期：2025年1月</p>
+        <p class="mb-0">发布日期：2026年1月</p>
     </div>
 
     <div class="update-item">
@@ -197,7 +268,7 @@
 
     <div class="update-version">
         <h3>🚀 版本 3.2.3 - 性能优化与稳定性提升</h3>
-        <p class="mb-0">发布日期：2025年1月</p>
+        <p class="mb-0">发布日期：2026年1月</p>
     </div>
 
     <div class="update-item">
@@ -226,7 +297,7 @@
 
     <div class="update-version">
         <h3>🚀 版本 3.2.2 - 状态显示优化</h3>
-        <p class="mb-0">发布日期：2025年1月</p>
+        <p class="mb-0">发布日期：2026年1月</p>
     </div>
 
     <div class="update-item">
@@ -243,7 +314,7 @@
 
     <div class="update-version">
         <h3>🚀 版本 3.2.1 - 稳定性与体验优化</h3>
-        <p class="mb-0">发布日期：2025年1月</p>
+        <p class="mb-0">发布日期：2026年1月</p>
     </div>
 
     <div class="update-item">
@@ -283,7 +354,7 @@
 
     <div class="update-version">
         <h3>🚀 版本 3.1.3 - 智能访问与体验优化</h3>
-        <p class="mb-0">发布日期：2025年1月</p>
+        <p class="mb-0">发布日期：2026年1月</p>
     </div>
 
     <div class="update-item">
@@ -324,7 +395,7 @@
 
     <div class="update-version">
         <h3>🚀 版本 3.1.0 - 用户体验全面升级</h3>
-        <p class="mb-0">发布日期：2025年1月</p>
+        <p class="mb-0">发布日期：2026年1月</p>
     </div>
 
     <div class="update-item">
@@ -367,7 +438,7 @@
 
     <div class="update-version">
         <h3>🚀 版本 3.0.8 - 重大改进</h3>
-        <p class="mb-0">发布日期：2024年12月</p>
+        <p class="mb-0">发布日期：2025年12月</p>
     </div>
 
     <div class="update-item">
@@ -389,7 +460,7 @@
 
     <div class="update-version">
         <h3>🚀 版本 3.0.4 - 功能优化</h3>
-        <p class="mb-0">发布日期：2024年12月</p>
+        <p class="mb-0">发布日期：2025年12月</p>
     </div>
 
     <div class="update-item">
@@ -457,7 +528,7 @@
 
     <div class="update-version">
         <h3>🚀 版本 2.9.6 - 终极重构与体验优化</h3>
-        <p class="mb-0">发布日期：2025年9月12日</p>
+        <p class="mb-0">发布日期：2025年9月</p>
     </div>
 
     <div class="update-item">
@@ -511,7 +582,7 @@
 
     <div class="update-version">
         <h3>🚀 版本 2.9.2 - 系统全面重构</h3>
-        <p class="mb-0">发布日期：2025年9月12日</p>
+        <p class="mb-0">发布日期：2025年9月</p>
     </div>
 
     <div class="update-item">
@@ -552,7 +623,7 @@
 
     <div class="update-version">
         <h3>🚀 版本 2.8.8 - 终极修复与功能重构</h3>
-        <p class="mb-0">发布日期：2025年9月12日</p>
+        <p class="mb-0">发布日期：2025年9月</p>
     </div>
 
     <div class="update-item">
@@ -751,58 +822,13 @@
         </div>
     </div>
 
-            <div class="update-version">
+    <div class="update-version">
         <h3>🚀 版本 2.6.3 - 全面重构与体验升级</h3>
-        <p class="mb-0">发布日期：2025年1月</p>
+        <p class="date">发布日期：2025年1月</p>
     </div>
 
-            <div class="update-version">
-        <h3>🚀 版本 2.5.9 - 终极修复与多端统一</h3>
-        <p class="mb-0">发布日期：2025年1月</p>
-    </div>
-
-            <div class="update-version">
-        <h3>🚀 版本 2.5.4 - 关键修复与体验优化</h3>
-        <p class="mb-0">发布日期：2025年1月</p>
-    </div>
-
-            <div class="update-version">
-        <h3>🚀 版本 2.5.0 - 全面修复与多端同步</h3>
-        <p class="mb-0">发布日期：2025年1月</p>
-    </div>
-
-            <div class="update-version">
-        <h3>🚀 版本 2.4.6 - 全面修复与多端同步</h3>
-        <p class="mb-0">发布日期：2025年1月</p>
-    </div>
-
-            <div class="update-version">
-        <h3>🚀 版本 2.4.3 - 深度优化与功能完善</h3>
-        <p class="mb-0">发布日期：2024年1月</p>
-    </div>
-
-    <div class="update-version">
-        <h3>🚀 版本 2.2.9 - 全面修复与体验升级</h3>
-        <p class="mb-0">发布日期：2024年12月</p>
-    </div>
-
-    <div class="update-version">
-        <h3>🚀 版本 2.2.5 - 全面修复与体验升级</h3>
-        <p class="mb-0">发布日期：2024年12月</p>
-    </div>
-
-    <div class="update-version">
-        <h3>🚀 版本 2.2.0 - 按键修复与游戏优化</h3>
-        <p class="mb-0">发布日期：2024年12月</p>
-    </div>
-
-    <div class="update-version">
-        <h3>🚀 版本 2.1.0 - 游戏保存与网络优化</h3>
-        <p class="mb-0">发布日期：2024年12月</p>
-    </div>
-
-            <div class="update-item">
-                <div class="update-category">🎯 核心玩法升级</div>
+    <div class="update-item">
+        <div class="update-category">🎯 核心玩法升级</div>
                 <div class="update-detail">
                     <ul class="feature-list">
                         <li><strong>数字合成机制</strong>：相同数字方块可合成更大数字（2+2=4，4+4=8，以此类推）</li>
@@ -869,159 +895,6 @@
                         <li><strong>网络状态检测</strong>：自动检测网络连接状态并提供优化建议</li>
                         <li><strong>连接速度提升</strong>：局域网模式下连接速度提升30%</li>
                         <li><strong>断线重连</strong>：网络断开时自动尝试重新连接</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="update-item">
-                <div class="update-category">🎯 版本 2.6.3 - 全面重构与体验升级</div>
-                <div class="update-detail">
-                    <ul class="feature-list">
-                        <li><strong>JSON解析错误终极修复</strong>：彻底解决"SyntaxError: Unexpected token '<', "<!doctype ..." is not valid JSON"错误，所有API端点100%返回标准JSON格式</li>
-                        <li><strong>软件端网页集成重构</strong>：完全重构软件端架构，直接集成网页版游戏到软件内，彻底解决方向键异常问题</li>
-                        <li><strong>移动端弹窗完美居中</strong>：游戏结束弹窗在移动端屏幕中央完美显示，支持触摸滑动和手势操作</li>
-                        <li><strong>排行榜数据清理与重构</strong>：彻底清理测试用户数据，优化数据获取逻辑，实现软件端、网页端、移动端数据100%实时同步</li>
-                        <li><strong>多端一致性终极优化</strong>：软件端、网页端、移动端在所有功能、界面、数据交互上实现100%一致</li>
-                        <li><strong>测试脚本全面清理</strong>：删除所有测试脚本和无用文件，减少应用体积，提升启动速度</li>
-                        <li><strong>网页集成界面优化</strong>：软件端顶部显示"查看更新与介绍"按钮，一键访问更新日志和介绍页面</li>
-                        <li><strong>移动端触摸体验升级</strong>：优化移动端触摸响应，游戏结束弹窗支持拖拽和手势关闭</li>
-                        <li><strong>网络错误处理增强</strong>：增加网络连接状态检测，提供详细的错误提示和自动重试机制</li>
-                        <li><strong>性能全面优化</strong>：减少网络延迟60%，提升游戏响应速度，优化移动端电池使用效率</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="update-item">
-                <div class="update-category">🎯 版本 2.5.9 - 终极修复与多端统一</div>
-                <div class="update-detail">
-                    <ul class="feature-list">
-                        <li><strong>JSON解析错误终极修复</strong>：彻底解决"SyntaxError: Unexpected token '<'"错误，确保所有API端点返回正确JSON格式</li>
-                        <li><strong>软件端方向键完全修复</strong>：上键严格向上移动，下键严格向下移动，完全消除增加/减少格数的异常行为</li>
-                        <li><strong>移动端弹窗完美居中升级</strong>：游戏结束弹窗采用fixed定位+模糊背景效果，在所有移动设备上完美居中显示</li>
-                        <li><strong>排行榜数据同步终极优化</strong>：实现软件端、网页端、移动端排行榜数据100%实时同步</li>
-                        <li><strong>多端功能统一化</strong>：确保软件端、网页端、移动端在所有功能上完全一致，包括游戏逻辑、界面显示、数据交互</li>
-                        <li><strong>错误处理机制全面升级</strong>：增加详细的错误日志、友好的用户提示、自动重试机制</li>
-                        <li><strong>性能全面优化</strong>：减少网络延迟50%，提升游戏响应速度，优化移动端触摸体验</li>
-                        <li><strong>兼容性终极测试</strong>：通过全面测试确保在所有主流浏览器、操作系统、设备上的完美兼容</li>
-                        <li><strong>无用脚本清理</strong>：删除冗余代码和无用脚本，减少应用体积，提升启动速度</li>
-                        <li><strong>用户体验全面优化</strong>：统一所有端的操作体验，简化游戏流程，提升整体用户体验</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="update-item">
-                <div class="update-category">🎯 版本 2.5.4 - 关键修复与体验优化</div>
-                <div class="update-detail">
-                    <ul class="feature-list">
-                        <li><strong>JSON解析错误彻底修复</strong>：修复"SyntaxError: Unexpected token '<'"错误，确保排行榜数据正确获取</li>
-                        <li><strong>软件端方向键精准修复</strong>：彻底解决上下键逻辑混乱问题，上键严格向上移动，下键严格向下移动</li>
-                        <li><strong>移动端弹窗完美居中</strong>：游戏结束弹窗采用fixed定位，确保在所有移动设备上完美居中显示</li>
-                        <li><strong>排行榜数据同步增强</strong>：优化数据获取逻辑，支持错误重试机制，提升数据同步稳定性</li>
-                        <li><strong>多端一致性强化</strong>：确保软件端、网页端、移动端在所有功能上100%保持一致</li>
-                        <li><strong>错误处理机制完善</strong>：增强异常捕获和处理，提供详细的错误日志和友好的用户提示</li>
-                        <li><strong>性能优化</strong>：减少网络请求延迟，提升游戏响应速度和用户体验</li>
-                        <li><strong>兼容性全面测试</strong>：通过全面测试确保在所有主流浏览器和设备上的完美兼容</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="update-item">
-                <div class="update-category">🎯 版本 2.5.0 - 全面修复与多端同步</div>
-                <div class="update-detail">
-                    <ul class="feature-list">
-                        <li><strong>软件端方向键修复</strong>：彻底修复上下键逻辑错误，上键正确向上移动，下键正确向下移动</li>
-                        <li><strong>移动端弹窗优化</strong>：游戏结束弹窗完美居中显示，提升移动用户体验</li>
-                        <li><strong>排行榜功能修复</strong>：修复所有排行榜显示异常，确保数据正确同步显示</li>
-                        <li><strong>JSON解析错误修复</strong>：彻底解决"Unexpected token '<'" JSON解析错误</li>
-                        <li><strong>数据同步优化</strong>：排行榜数据实时同步，无延迟显示</li>
-                        <li><strong>多端功能一致性</strong>：实现软件端、网页端、移动端功能100%同步</li>
-                        <li><strong>界面统一性</strong>：统一所有端界面显示，用户体验一致</li>
-                        <li><strong>稳定性提升</strong>：增强系统稳定性，减少异常错误</li>
-                        <li><strong>兼容性增强</strong>：确保所有设备和浏览器100%兼容</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="update-item">
-                <div class="update-category">🎯 版本 2.4.6 - 全面修复与多端同步</div>
-                <div class="update-detail">
-                    <ul class="feature-list">
-                        <li><strong>软件端方向键修复</strong>：彻底修复上下键逻辑错误，上键正确向上移动，下键正确向下移动</li>
-                        <li><strong>移动端弹窗优化</strong>：游戏结束弹窗完美居中显示，提升移动用户体验</li>
-                        <li><strong>排行榜功能修复</strong>：修复所有排行榜显示异常，确保数据正确同步显示</li>
-                        <li><strong>JSON解析错误修复</strong>：彻底解决"Unexpected token '<'" JSON解析错误</li>
-                        <li><strong>多端功能一致性</strong>：实现软件端、网页端、移动端功能100%同步</li>
-                        <li><strong>数据同步优化</strong>：排行榜数据实时同步，无延迟显示</li>
-                        <li><strong>界面统一性</strong>：统一所有端界面显示，用户体验一致</li>
-                        <li><strong>稳定性提升</strong>：增强系统稳定性，减少异常错误</li>
-                        <li><strong>兼容性增强</strong>：确保所有设备和浏览器100%兼容</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="update-item">
-                <div class="update-category">🎯 版本 2.4.3 - 深度优化与功能完善</div>
-                <div class="update-detail">
-                    <ul class="feature-list">
-                        <li><strong>方向键逻辑修复</strong>：软件端下键正确执行向下移动，上键正确执行向上移动</li>
-                        <li><strong>界面简洁优化</strong>：移除网页端特殊方块M相关提示信息，保持界面简洁</li>
-                        <li><strong>游戏结束显示优化</strong>：网页端以窗口形式居中弹出game over提示，提升用户体验</li>
-                        <li><strong>最高分记录修复</strong>：确保分数正确保存到本地和排行榜</li>
-                        <li><strong>排行榜功能修复</strong>：实现软件与网页端数据同步</li>
-                        <li><strong>JSON解析错误修复</strong>：解决Unexpected token '<' 问题</li>
-                        <li><strong>稳定性增强</strong>：完善错误处理机制，提升系统稳定性</li>
-                        <li><strong>多端一致性</strong>：确保软件端、网页端、移动端功能100%同步</li>
-                        <li><strong>兼容性优化</strong>：实现跨平台100%功能一致性</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="update-item">
-                <div class="update-category">🎯 版本 2.2.9 - 全面修复与体验升级</div>
-                <div class="update-detail">
-                    <ul class="feature-list">
-                        <li><strong>方向键功能彻底修复</strong>：软件端下键严格限制为移动功能，禁止增加格数</li>
-                        <li><strong>窗口优化</strong>：设置适宜大小的窗口(500x600)并自动居中显示</li>
-                        <li><strong>新增5数字</strong>：游戏方块新增5数字，概率分布：2(70%)、4(20%)、5(10%)</li>
-                        <li><strong>智能游戏结束判断</strong>：当格子占满且无法合并时自动显示game over</li>
-                        <li><strong>一键新游戏机制</strong>：游戏结束后点击任意位置自动开启新游戏</li>
-                        <li><strong>实时分数记录</strong>：游戏过程中实时记录分数，与排行榜完全兼容</li>
-                        <li><strong>多端一致性</strong>：软件与网页端功能100%同步，包括失败判断、分数记录</li>
-                        <li><strong>用户体验优化</strong>：简化游戏说明，提升整体交互体验</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="update-item">
-                <div class="update-category">🎯 版本 2.2.5 - 全面修复与体验升级</div>
-                <div class="update-detail">
-                    <ul class="feature-list">
-                        <li><strong>方向键功能彻底修复</strong>：解决软件中下键增加格数而非移动方块的问题</li>
-                        <li><strong>M方块视觉优化</strong>：增强M方块显示效果（红色背景+大字体+边框），提升用户体验</li>
-                        <li><strong>全屏启动优化</strong>：软件启动时自动全屏显示，充分利用屏幕空间</li>
-                        <li><strong>游戏说明精简</strong>：移除"达到2048"限制，让玩家自由挑战更高分数</li>
-                        <li><strong>智能游戏结束判断</strong>：当格子占满且无法合并时自动显示game over</li>
-                        <li><strong>一键新游戏机制</strong>：游戏结束后点击任意位置自动开启新游戏</li>
-                        <li><strong>实时分数记录系统</strong>：游戏过程中实时记录分数，与排行榜完全兼容</li>
-                        <li><strong>多端同步优化</strong>：确保软件与网页端功能100%一致，包括M方块、失败判断、分数记录</li>
-                        <li><strong>用户体验全面提升</strong>：优化交互反馈，提升整体游戏体验</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="update-item">
-                <div class="update-category">🎯 版本 2.2.0 - 按键修复与游戏优化</div>
-                <div class="update-detail">
-                    <ul class="feature-list">
-                        <li><strong>方向键功能修复</strong>：彻底解决按下键时增加格数而非移动方块的问题</li>
-                        <li><strong>M方块体验优化</strong>：增强M方块视觉效果（橙色背景+白色文字），添加详细使用说明</li>
-                        <li><strong>全屏启动</strong>：软件启动时自动最大化窗口，提升视觉体验</li>
-                        <li><strong>胜利判断完善</strong>：为desktop.html添加完整的2048胜利判断逻辑</li>
-                        <li><strong>游戏结束智能判断</strong>：当格子占满且无法合并时自动显示game over</li>
-                        <li><strong>一键新游戏</strong>：游戏结束后点击任意位置自动开启新游戏</li>
-                        <li><strong>实时分数记录</strong>：游戏过程中实时记录分数，支持本地存储和云端同步</li>
-                        <li><strong>多端一致性</strong>：确保软件与网页端功能完全一致，包括M方块、胜利判断、分数记录等</li>
-                        <li><strong>用户体验提升</strong>：游戏说明中添加M方块使用指南，优化交互反馈</li>
                     </ul>
                 </div>
             </div>
