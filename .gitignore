@@ -3,8 +3,9 @@ venv/
 venv-ubunt/
 
 # 备份文件
-备份.zip
+*.zip
 *.deb
+*.7z
 
 # 构建输出目录
 dist/
