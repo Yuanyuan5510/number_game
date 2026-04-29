@@ -7,6 +7,7 @@ venv-ubunt/
 
 # 构建输出目录
 dist/
+dist-linux/
 
 # 日志目录
 logs/
