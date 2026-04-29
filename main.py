@@ -143,7 +143,7 @@ def clean_log_files():
     except Exception as e:
         logger.error(f"清理日志文件时出错: {e}")
 
-VERSION = "3.2.6"
+VERSION = "3.2.7"
 
 # 日志文件保存在用户可访问的位置
 if os.name == 'nt':

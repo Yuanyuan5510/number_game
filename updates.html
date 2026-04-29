@@ -157,6 +157,47 @@
                 <p class="text-muted">探索数字世界的无限可能</p>
             </div>
     <div class="update-version">
+        <h3>🚀 版本 3.2.7 - 问题修复与Ubuntu系统支持</h3>
+        <p class="mb-0">发布日期：2026年4月</p>
+    </div>
+
+    <div class="update-item">
+        <div class="update-category">🔧 已知问题修复</div>
+        <div class="update-detail">
+            <ul class="feature-list">
+                <li><strong>更新日志格式修复</strong>：修复版本2.8.4的HTML结构混乱问题，确保标题层级和样式正确渲染</li>
+                <li><strong>窗口关闭事件处理</strong>：修复欢迎窗口和更新窗口通过"x"按钮关闭后无法正确返回游戏主界面的问题</li>
+                <li><strong>资源释放优化</strong>：优化窗口关闭时的WebEngineView资源释放，避免内存泄漏</li>
+                <li><strong>信号机制完善</strong>：确保窗口关闭时正确发出返回信号，保证游戏状态不丢失</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="update-item">
+        <div class="update-category">🐧 Ubuntu系统支持</div>
+        <div class="update-detail">
+            <ul class="feature-list">
+                <li><strong>跨平台兼容</strong>：添加对Ubuntu操作系统的完整支持，确保软件在Ubuntu环境下正常运行</li>
+                <li><strong>虚拟环境创建</strong>：提供Ubuntu环境下的虚拟环境创建指南和配置说明</li>
+                <li><strong>依赖安装适配</strong>：更新依赖安装流程，支持Ubuntu系统的包管理器和Python环境</li>
+                <li><strong>打包工具支持</strong>：集成patchelf依赖，确保Nuitka在Ubuntu环境下能够正确打包</li>
+                <li><strong>路径处理优化</strong>：优化跨平台路径处理，确保不同操作系统下的文件资源访问正常</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="update-item">
+        <div class="update-category">📦 打包流程优化</div>
+        <div class="update-detail">
+            <ul class="feature-list">
+                <li><strong>Linux打包支持</strong>：调整打包命令参数，适配Linux平台的单文件可执行程序生成</li>
+                <li><strong>资源文件包含</strong>：优化数据文件打包策略，确保所有模板和静态资源正确包含</li>
+                <li><strong>QtWebEngine集成</strong>：完善PyQt6插件配置，正确包含QtWebEngine所需的全部资源文件</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="update-version">
         <h3>🚀 版本 3.2.6 - 欢迎页面功能增强</h3>
         <p class="mb-0">发布日期：2026年4月</p>
     </div>

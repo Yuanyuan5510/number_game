@@ -1,14 +1,20 @@
 # SWnumbergame 🚀
 
 ## 📖 项目简介
-SWnumbergame是一款基于Python和PyQt6开发的数字游戏应用，具有现代化的用户界面和丰富的功能。本项目旨在提供一个功能完整、用户友好的游戏体验，包括欢迎页面、游戏主界面、用户管理等核心功能。
+SWnumbergame是一款基于Python和PyQt6开发的数字游戏应用，具有现代化的用户界面和丰富的功能。本项目旨在提供一个功能完整、用户友好的游戏体验，包括欢迎页面、游戏主界面、用户管理等核心功能。支持Windows和Ubuntu双平台运行。
 
 ## 📝 版本信息
-- **当前版本**：3.2.6
+- **当前版本**：3.2.7
 - **更新日期**：2026年4月
-- **版本特点**：欢迎页面功能增强
+- **版本特点**：问题修复与Ubuntu系统支持
 
 ## ✨ 主要功能
+
+### 🐧 Ubuntu系统支持
+- **跨平台兼容**：提供对Ubuntu操作系统的完整支持，软件可在Ubuntu环境下正常运行
+- **虚拟环境支持**：提供详细的Ubuntu虚拟环境创建和配置指南
+- **依赖适配**：支持Ubuntu系统的包管理器和Python环境配置
+- **打包支持**：集成Linux平台打包工具支持，可生成Ubuntu下的可执行文件
 
 ### 🎮 欢迎页面
 - **返回游戏功能**：实现欢迎页面的"返回游戏"功能，用户可顺畅返回游戏主界面
@@ -28,31 +34,71 @@ SWnumbergame是一款基于Python和PyQt6开发的数字游戏应用，具有现
 - **用户列表更新**：解决用户管理窗口打开后无法及时更新用户列表的问题
 - **数据刷新机制**：优化数据刷新机制，确保显示最新用户信息
 
+### 🔒 问题修复
+- **更新日志格式修复**：修复版本2.8.4的HTML结构混乱问题，确保标题层级和样式正确渲染
+- **窗口关闭事件处理**：修复欢迎窗口和更新窗口通过"x"按钮关闭后无法正确返回游戏主界面的问题
+- **资源释放优化**：优化窗口关闭时的WebEngineView资源释放，避免内存泄漏
+- **信号机制完善**：确保窗口关闭时正确发出返回信号，保证游戏状态不丢失
+
 ## 📋 软件属性
 - **文件说明**：SWnumbergame
 - **类型**：应用程序
-- **文件版本**：3.2.6
+- **文件版本**：3.2.7
 - **产品名称**：SWnumbergame
-- **产品版本**：3.26
+- **产品版本**：3.2.7
 - **版权**：Wangstation ©2025-2026
 - **修改日期**：2026年4月
 
 ## 🚀 使用方法
-1. **运行环境**：确保已安装Python 3.11
+
+### Windows系统
+1. **运行环境**：确保已安装Python 3.11+
 2. **启动程序**：使用Python运行main.py文件
 3. **权限确认**：首次运行会弹出UAC权限申请，点击"是"确认
 4. **界面访问**：
    - 游戏界面：程序启动后自动打开
    - 服务器地址：http://127.0.0.1:5000
 
-## 📦 打包方法
+### Ubuntu系统
 1. **环境准备**：
-   - 下载并安装Python 3.11
+   ```bash
+   # 安装系统依赖
+   sudo apt-get update
+   sudo apt-get install -y python3 python3-pip python3-venv
+
+   # 创建虚拟环境
+   python3 -m venv venv-ubunt
+
+   # 激活虚拟环境
+   source venv-ubunt/bin/activate
+
+   # 安装项目依赖
+   pip install -r requirements.txt
+   ```
+
+2. **启动程序**：
+   ```bash
+   # 激活虚拟环境
+   source venv-ubunt/bin/activate
+
+   # 运行程序
+   python main.py
+   ```
+
+3. **界面访问**：
+   - 游戏界面：程序启动后自动打开
+   - 服务器地址：http://127.0.0.1:5000
+
+## 📦 打包方法
+
+### Windows系统打包
+1. **环境准备**：
+   - 下载并安装Python 3.11+
    - 安装打包工具：`pip install nuitka`
 
 2. **执行打包命令**：
    ```bash
-      venv\Scripts\python -m nuitka \
+   venv\Scripts\python -m nuitka \
       --standalone \
       --enable-plugin=pyqt6 \
       --windows-console-mode=disable \
@@ -67,13 +113,49 @@ SWnumbergame是一款基于Python和PyQt6开发的数字游戏应用，具有现
       main.py
    ```
 
-3. **打包参数说明**：
+3. **运行打包文件**：打包完成后，在dist目录中找到main.exe文件即可运行
+
+### Ubuntu系统打包
+1. **环境准备**：
+   ```bash
+   # 安装patchelf（必需）
+   sudo apt-get install -y patchelf
+
+   # 创建虚拟环境并安装依赖
+   python3 -m venv venv-ubunt
+   source venv-ubunt/bin/activate
+   pip install nuitka
+   ```
+
+2. **执行打包命令**：
+   ```bash
+   source venv-ubunt/bin/activate && python -m nuitka \
+      --enable-plugin=pyqt6 \
+      --onefile \
+      --include-data-dir=templates=templates \
+      --include-data-dir=static=static \
+      --include-data-file=updates.html=updates.html \
+      --include-data-file=welcome.html=welcome.html \
+      --include-data-file=game_config.json=game_config.json \
+      --include-data-file=leaderboard.json=leaderboard.json \
+      --output-dir=dist \
+      main.py
+   ```
+
+3. **运行打包文件**：打包完成后，在dist目录中找到main.bin文件，添加执行权限后运行：
+   ```bash
+   chmod +x dist/main.bin
+   ./dist/main.bin
+   ```
+
+4. **打包参数说明**：
    | 参数 | 说明 |
    |------|------|
-   | `--standalone` | 创建独立可执行文件，不依赖系统Python环境 |
+   | `--standalone`（Windows） | 创建独立可执行文件，不依赖系统Python环境 |
+   | `--onefile`（Ubuntu） | 创建单文件可执行程序 |
    | `--enable-plugin=pyqt6` | 启用PyQt6插件，确保PyQt6相关功能正常工作 |
-   | `--windows-icon-from-ico=app_icon.ico` | 设置Windows应用程序图标 |
-   | `--windows-console-mode=disable` | 禁用控制台输出 |
+   | `--windows-icon-from-ico`（Windows） | 设置Windows应用程序图标 |
+   | `--windows-console-mode=disable`（Windows） | 禁用控制台输出 |
    | `--include-data-dir=templates=templates` | 包含templates目录及其所有内容 |
    | `--include-data-dir=static=static` | 包含static目录及其所有内容 |
    | `--include-data-file=updates.html=updates.html` | 包含updates.html文件 |
@@ -83,17 +165,15 @@ SWnumbergame是一款基于Python和PyQt6开发的数字游戏应用，具有现
    | `--output-dir=dist` | 指定输出目录为dist |
    | `main.py` | 主入口脚本文件 |
 
-4. **运行打包文件**：打包完成后，在dist目录中找到main.exe文件即可运行
-
 ## ⚠️ 注意事项
-- **权限要求**：首次运行需要管理员权限，后续运行可记住选择
+- **权限要求**：首次运行需要管理员权限，后续运行可记住选择（Windows）
 - **网络访问**：如防火墙提示，请允许程序访问网络
 - **数据存储**：游戏数据保存在本地，无需联网即可运行
 - **依赖管理**：项目依赖已记录在requirements.txt文件中
+- **跨平台**：本软件支持Windows和Ubuntu双平台，配置文件和游戏数据可在两平台间通用
 
 ## 📄 许可证
 本项目采用Permissive Non-Commercial Software License v1.0 (International)许可证
 
 ## 👥 贡献
 欢迎提交Issue和Pull Request来帮助改进这个项目！
-
