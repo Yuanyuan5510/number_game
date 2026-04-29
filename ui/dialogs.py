@@ -31,7 +31,7 @@ def get_resource_path(relative_path):
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QPushButton, QTableWidget,
                             QTableWidgetItem, QFrame, QHBoxLayout, QHeaderView, QCheckBox,
                             QMessageBox, QAbstractItemView)
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import Qt, pyqtSignal, QEvent
 from PyQt6.QtGui import QFont, QColor, QPainter, QPalette
 from PyQt6.QtCharts import QChart, QChartView, QBarSeries, QBarSet, QValueAxis, QCategoryAxis
 
@@ -82,6 +82,19 @@ class UpdateWindow(BaseWindow):
         logger.info("用户请求从更新页面返回")
         self.go_back_signal.emit()
         self.close()
+
+    def closeEvent(self, event):
+        """处理窗口关闭事件（点击右上角x按钮）"""
+        logger.info("用户通过关闭按钮关闭更新窗口")
+        # 确保发出返回信号
+        self.go_back_signal.emit()
+        # 释放 WebEngineView 资源
+        if hasattr(self, 'web_view'):
+            self.web_view.page().deleteLater()
+            self.web_view.deleteLater()
+            self.web_view = None
+        # 调用父类方法完成关闭
+        super().closeEvent(event)
 
 
 class WelcomeWindow(BaseWindow):
@@ -136,6 +149,19 @@ class WelcomeWindow(BaseWindow):
         logger.info("用户请求返回游戏")
         self.go_back_signal.emit()
         self.close()
+
+    def closeEvent(self, event):
+        """处理窗口关闭事件（点击右上角x按钮）"""
+        logger.info("用户通过关闭按钮关闭欢迎窗口")
+        # 确保发出返回信号
+        self.go_back_signal.emit()
+        # 释放 WebEngineView 资源
+        if hasattr(self, 'web_view'):
+            self.web_view.page().deleteLater()
+            self.web_view.deleteLater()
+            self.web_view = None
+        # 调用父类方法完成关闭
+        super().closeEvent(event)
 
 
 class UserManagementWindow(BaseWindow):
